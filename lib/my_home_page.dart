@@ -43,33 +43,32 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         body: ValueListenableBuilder(
-          valueListenable: box.listenable(),
-          builder: (context, box, _) {
-           if (box.isEmpty) {
-            return const Center(
-              child: Text('Add a contact'),
-            );
-          } else {
-         return  ListView.separated(
-            itemCount: box.length,
-            itemBuilder: (context, i) {
-
-              return ListTile(
-              onTap: () => _showDetails(context, box, i),
-              title: Text(box.getAt(i).name),
-              subtitle: Text(box.getAt(i).country),
-                trailing: IconButton(
-                      onPressed: () => _deleteInfo(i),
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-            ));
-            },
-            separatorBuilder: (context, i) => const Divider(),
-        );
-        }
-  }),
+            valueListenable: box.listenable(),
+            builder: (context, box, _) {
+              if (box.isEmpty) {
+                return const Center(
+                  child: Text('Add a contact'),
+                );
+              } else {
+                return ListView.separated(
+                  itemCount: box.length,
+                  itemBuilder: (context, i) {
+                    return ListTile(
+                        onTap: () => _showDetails(context, box, i),
+                        title: Text(box.getAt(i).name),
+                        subtitle: Text(box.getAt(i).country),
+                        trailing: IconButton(
+                          onPressed: () => _deleteInfo(i),
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                        ));
+                  },
+                  separatorBuilder: (context, i) => const Divider(),
+                );
+              }
+            }),
         bottomNavigationBar: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -88,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // ElevatedButton(
             //   onPressed: _deleteInfo,
             //   child: Text('Delete'),
-            // ), 
+            // ),
           ],
         ),
       ),
@@ -97,31 +96,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<dynamic> _showDetails(BuildContext context, Box<dynamic> box, int i) {
     return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Person Details'),
-          content: Column(
-          mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(box.getAt(i).name),
-              Text(box.getAt(i).country),
-
-            ],
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('OK'),
-              onPressed: () {
-               
-                Navigator.pop(context);
-              },
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Person Details'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(box.getAt(i).name),
+                Text(box.getAt(i).country),
+              ],
             ),
-          ],
-        );
-      });
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
   }
 
   _addInfo() async {
@@ -154,40 +151,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void addPeople(name, country) {
-      People newPerson = People(
+    People newPerson = People(
       name: nameController.text,
       country: countryController.text,
     );
-    box.add(newPerson);
-    print('Info added to box!');
-    print(box.values);
-    print(box.values.contains(People(name: 'Peter', country: 'Nigeria')));
-
-/* 
-     box.add(People(
-      name: name,
-      country: country,
-    )); */
-
-    /* List<People> peopleList = [];
-
-    final hivePeople = peopleBox.get('peopleList');
-
-    if (null != hivePeople && hivePeople.isNotEmpty) {
-      print('hiveP inside: $hivePeople');
-      print('peopleList inside: $peopleList');
-      peopleList = hivePeople;
-      print('peopleList after: $peopleList');
+    if (!newPerson.existsInList(box.values)) {
+      box.add(newPerson);
     }
-    print('peopleList outside: $peopleList');
- 
-
-     peopleBox.put('peopleList', peopleList);
-    for (People person in peopleBox.get('peopleList')) {
-      print(person.toString());
-    }
-
-    /* peopleListNotifier.value = peopleList; */ */
   }
 
   _getInfo() {
@@ -203,7 +173,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _updateInfo() {
-    
     // final peopleList = <People>[];
     // peopleList.add(People(name: 'aku', country: 'India'));
     // box.put('peopleList', peopleList);
@@ -211,8 +180,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _deleteInfo(int index) {
-      box.deleteAt(index);
-  box.delete("$index");
+    box.deleteAt(index);
+    box.delete("$index");
     print('Info deleted from box!');
   }
 }
