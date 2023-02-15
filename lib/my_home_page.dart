@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive_todo/people.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({required this.title, super.key});
 
   final String title;
 
@@ -12,10 +12,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late final Box box;
   final nameController = TextEditingController();
   final countryController = TextEditingController();
-  final peopleListNotifier = ValueNotifier<List<People>>([]);
+
+  late final Box box;
 
   @override
   void initState() {
@@ -26,8 +26,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     Hive.close();
-    nameController.clear();
-    countryController.clear();
     super.dispose();
   }
 
