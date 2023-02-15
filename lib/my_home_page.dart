@@ -37,10 +37,6 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
-          leading: ElevatedButton(
-            onPressed: () => addPeople('aku', 'contry'),
-            child: const Text('x'),
-          ),
         ),
         body: ValueListenableBuilder(
             valueListenable: box.listenable(),
@@ -61,7 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPressed: () => _deleteInfo(i),
                           icon: const Icon(
                             Icons.delete,
-                            color: Colors.red,
                           ),
                         ));
                   },
@@ -69,27 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               }
             }),
-        bottomNavigationBar: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: _addInfo,
-              child: Text('Add'),
-            ),
-            // ElevatedButton(
-            //   onPressed: _getInfo,
-            //   child: Text('Get'),
-            // ),
-            // ElevatedButton(
-            //   onPressed: _updateInfo,
-            //   child: Text('Update'),
-            // ),
-            // ElevatedButton(
-            //   onPressed: _deleteInfo,
-            //   child: Text('Delete'),
-            // ),
-          ],
-        ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: _addInfo, child: const Icon(Icons.add)),
       ),
     );
   }
@@ -142,6 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     nameController.text.trim(),
                     countryController.text.trim(),
                   );
+                  nameController.clear();
+                  countryController.clear();
                   Navigator.pop(context);
                 },
               ),
@@ -160,17 +138,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  _getInfo() {
-    // final peopleList = <People>[];
-
-    // for (People person in box.get('peopleList')) {
-    //   if (!peopleList.contains(person)) {
-    //     peopleList.add(person);
-    //   }
-    //   print(person.toString());
-    // }
-    // peopleListNotifier.value = peopleList;
-  }
 
   _updateInfo() {
     // final peopleList = <People>[];
