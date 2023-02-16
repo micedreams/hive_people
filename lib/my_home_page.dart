@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hive_todo/people.dart';
+import 'bloc/bloc/my_home_page_bloc.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({required this.title, super.key});
@@ -15,54 +16,42 @@ class _MyHomePageState extends State<MyHomePage> {
   final nameController = TextEditingController();
   final countryController = TextEditingController();
 
-  late final Box box;
-
   @override
-  void initState() {
-    super.initState();
-    box = Hive.box('peopleBox');
-  }
-
-  @override
-  void dispose() {
-    Hive.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title),
-          ),
-          body: ValueListenableBuilder(
-            valueListenable: box.listenable(),
-            builder: (context, box, _) {
-              if (box.isEmpty) {
-                return const Center(child: Text('Add a contact'));
-              } else {
-                return ListView.separated(
-                  itemCount: box.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, index) => ListTile(
-                    onLongPress: () => updateDetails(context, box, index),
-                    onTap: () => showDetails(context, box, index),
-                    title: Text(box.getAt(index).name),
-                    subtitle: Text(box.getAt(index).country),
-                    trailing: IconButton(
-                      onPressed: () => deletePeople(index),
-                      icon: const Icon(Icons.delete),
+  Widget build(BuildContext context) =>
+      BlocBuilder<MyHomePageBloc, MyHomePageBlocState>(
+        builder: (context, state) {
+          return SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(widget.title),
+              ),
+              body: (state.box.isEmpty)
+                  ? const Center(child: Text('Add a contact'))
+                  : ListView.separated(
+                      itemCount: state.box.length,
+                      separatorBuilder: (context, index) => const Divider(),
+                      itemBuilder: (context, index) => ListTile(
+                        onLongPress: () =>
+                            updateDetails(context, state.box, index),
+                        onTap: () => showDetails(context, state.box, index),
+                        title: Text(state.box.getAt(index).name),
+                        subtitle: Text(state.box.getAt(index).country),
+                        trailing: IconButton(
+                          onPressed: () {
+                            return BlocProvider.of<MyHomePageBloc>(context).add(
+                                DeleteEntryMyHomePageEvent(state.box, index));
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              }
-            },
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: addDetails,
-            child: const Icon(Icons.add),
-          ),
-        ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => addDetails(state.box),
+                child: const Icon(Icons.add),
+              ),
+            ),
+          );
+        },
       );
 
   void showDetails(BuildContext context, Box<dynamic> box, int index) =>
@@ -88,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
 
-  void addDetails() async => showDialog(
+  void addDetails(Box box) async => showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Add Person'),
@@ -103,13 +92,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               child: const Text('OK'),
               onPressed: () {
-                addPeople(
-                  nameController.text.trim(),
-                  countryController.text.trim(),
-                );
+                final name = nameController.text.trim();
+                final country = countryController.text.trim();
                 nameController.clear();
                 countryController.clear();
                 Navigator.pop(context);
+                return BlocProvider.of<MyHomePageBloc>(context)
+                    .add(AddEntryMyHomePageEvent(
+                  box,
+                  name,
+                  country,
+                ));
               },
             ),
           ],
@@ -135,12 +128,14 @@ class _MyHomePageState extends State<MyHomePage> {
           ElevatedButton(
             child: const Text('OK'),
             onPressed: () {
-              updatePeople(
-                nameController.text.trim(),
-                countryController.text.trim(),
+              return BlocProvider.of<MyHomePageBloc>(context)
+                  .add(UpdateEntryMyHomePageEvent(
                 box,
                 index,
-              );
+                nameController.text.trim(),
+                countryController.text.trim(),
+              ));
+
               nameController.clear();
               countryController.clear();
               Navigator.pop(context);
@@ -149,32 +144,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
-  }
-
-  void addPeople(String name, String country) {
-    final newPerson = People(
-      name: name,
-      country: country,
-    );
-
-    if (!newPerson.existsInList(box.values)) {
-      box.add(newPerson);
-    }
-  }
-
-  void updatePeople(String name, String country, Box box, int index) {
-    final newPerson = People(
-      name: name,
-      country: country,
-    );
-
-    if (!newPerson.existsInList(box.values)) {
-      box.putAt(index, newPerson);
-    }
-  }
-
-  void deletePeople(int index) {
-    box.deleteAt(index);
-    box.delete("$index");
   }
 }
